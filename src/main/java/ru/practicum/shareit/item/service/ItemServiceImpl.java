@@ -37,7 +37,7 @@ public class ItemServiceImpl implements ItemService {
         Item existingItem = itemRepository.findItemById(itemId);
 
         if (!userId.equals(existingItem.getOwner())) {
-            throw new SecurityException("Только пользователь может обновить вещь");
+            throw new NotFoundException("Только пользователь может обновить вещь");
         }
 
         if (itemDto.getName() != null) {
