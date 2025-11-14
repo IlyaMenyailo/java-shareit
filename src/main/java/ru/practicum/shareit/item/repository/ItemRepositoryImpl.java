@@ -54,9 +54,9 @@ public class ItemRepositoryImpl implements ItemRepository {
     }
 
     @Override
-    public Collection<Item> findAll() {
-        log.info("Список всех пользователей");
-        return items.values();
+    public List<Item> findAll() {
+        log.info("Список всех предметов");
+        return new ArrayList<>(items.values());
     }
 
     @Override

@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.util.HttpHeaders;
 
 import java.util.List;
 
@@ -18,14 +19,14 @@ public class ItemController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ItemDto createItem(@Valid @RequestBody ItemDto itemDto,
-                              @RequestHeader("X-Sharer-User-Id") Long ownerId) {
+                              @RequestHeader(HttpHeaders.USER_ID_HEADER) Long ownerId) {
         return itemService.createItem(itemDto, ownerId);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(@PathVariable Long itemId,
                               @RequestBody ItemDto itemDto,
-                              @RequestHeader("X-Sharer-User-Id") Long ownerId) {
+                              @RequestHeader(HttpHeaders.USER_ID_HEADER) Long ownerId) {
         return itemService.updateItem(itemId, itemDto, ownerId);
     }
 
@@ -35,7 +36,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> getItemsByOwner(@RequestHeader("X-Sharer-User-Id") Long ownerId) {
+    public List<ItemDto> getItemsByOwner(@RequestHeader(HttpHeaders.USER_ID_HEADER) Long ownerId) {
         return itemService.getItemsByOwner(ownerId);
     }
 

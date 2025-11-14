@@ -40,15 +40,7 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundException("Только пользователь может обновить вещь");
         }
 
-        if (itemDto.getName() != null) {
-            existingItem.setName(itemDto.getName());
-        }
-        if (itemDto.getDescription() != null) {
-            existingItem.setDescription(itemDto.getDescription());
-        }
-        if (itemDto.getAvailable() != null) {
-            existingItem.setAvailable(itemDto.getAvailable());
-        }
+        ItemMapper.updateItemFromDto(itemDto, existingItem);
 
         Item updatedItem = itemRepository.update(existingItem.getId(), existingItem, userId);
         return ItemMapper.toItemDto(updatedItem);

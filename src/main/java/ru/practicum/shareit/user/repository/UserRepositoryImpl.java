@@ -6,23 +6,22 @@ import ru.practicum.shareit.exception.DuplicatedDataException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Repository
 @Slf4j
 public class UserRepositoryImpl implements UserRepository {
 
     private final Map<Long, User> users = new HashMap<>();
+    private final Set<String> emails = new HashSet<>();
 
     @Override
     public User create(User user) {
         log.info("Попытка создать пользователя с email: {}", user.getEmail());
-        validateEmail(user);
+        validateEmail(user.getEmail(), null);
         user.setId(getNextId());
         users.put(user.getId(), user);
+        emails.add(user.getEmail().toLowerCase());
         log.info("Пользователь с id {} и email {} успешно создан", user.getId(), user.getEmail());
         return user;
     }
@@ -39,7 +38,10 @@ public class UserRepositoryImpl implements UserRepository {
 
         if (updateUser.getEmail() != null &&
                 !existingUser.getEmail().equals(updateUser.getEmail())) {
-            validateEmail(updateUser);
+            validateEmail(updateUser.getEmail(), updateUser.getId());
+
+            emails.remove(existingUser.getEmail().toLowerCase());
+            emails.add(updateUser.getEmail().toLowerCase());
         }
 
         if (updateUser.getName() != null) {
@@ -54,9 +56,9 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Collection<User> findAll() {
+    public List<User> findAll() {
         log.info("Список всех пользователей");
-        return users.values();
+        return new ArrayList<>(users.values());
     }
 
     @Override
@@ -68,18 +70,26 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public void delete(Long id) {
         log.info("Удаление пользователя по ID: {}", id);
+        User user = users.get(id);
+        if (user != null) {
+            emails.remove(user.getEmail().toLowerCase());
+        }
         users.remove(id);
     }
 
-    private void validateEmail(User user) throws DuplicatedDataException {
-        if (user.getEmail() != null) {
-            boolean emailExists = users.values().stream()
-                    .anyMatch(u -> u.getEmail() != null &&
-                            u.getEmail().equalsIgnoreCase(user.getEmail()) &&
-                            !Objects.equals(u.getId(), user.getId()));
-            if (emailExists) {
-                log.error("Email {} уже используется", user.getEmail());
-                throw new DuplicatedDataException("Этот email уже используется");
+    private void validateEmail(String email, Long userId) throws DuplicatedDataException {
+        if (email != null) {
+            String emailLowerCase = email.toLowerCase();
+            if (emails.contains(emailLowerCase)) {
+
+                User existingUser = users.values().stream()
+                        .filter(user -> user.getEmail().equalsIgnoreCase(emailLowerCase))
+                        .findFirst()
+                        .orElse(null);
+                if (userId == null || (existingUser != null && !existingUser.getId().equals(userId))) {
+                    log.error("Email {} уже используется", email);
+                    throw new DuplicatedDataException("Этот email уже используется");
+                }
             }
         }
     }

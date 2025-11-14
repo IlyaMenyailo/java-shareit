@@ -23,4 +23,19 @@ public class ItemMapper {
                 .request(itemDto.getRequest() != null ? itemDto.getRequest() : null)
                 .build();
     }
+
+    public static void updateItemFromDto(ItemDto itemDto, Item item) {
+        if (itemDto.getName() != null) {
+            item.setName(itemDto.getName());
+        }
+        if (itemDto.getDescription() != null) {
+            item.setDescription(itemDto.getDescription());
+        }
+        if (itemDto.getAvailable() != null) {
+            item.setAvailable(itemDto.getAvailable());
+        }
+        if (itemDto.getRequest() != null) {
+            item.setRequest(itemDto.getRequest());
+        }
+    }
 }

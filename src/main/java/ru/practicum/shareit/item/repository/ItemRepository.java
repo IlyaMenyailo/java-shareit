@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.repository;
 
 import ru.practicum.shareit.item.model.Item;
 
-import java.util.Collection;
 import java.util.List;
 
 public interface ItemRepository {
@@ -13,7 +12,7 @@ public interface ItemRepository {
 
     Item findItemById(Long itemId);
 
-    Collection<Item> findAll();
+    List<Item> findAll();
 
     List<Item> searchItems(String text);
 
