@@ -82,11 +82,12 @@ public class UserRepositoryImpl implements UserRepository {
             String emailLowerCase = email.toLowerCase();
             if (emails.contains(emailLowerCase)) {
 
-                User existingUser = users.values().stream()
-                        .filter(user -> user.getEmail().equalsIgnoreCase(emailLowerCase))
-                        .findFirst()
-                        .orElse(null);
-                if (userId == null || (existingUser != null && !existingUser.getId().equals(userId))) {
+                if (userId == null) {
+                    throw new DuplicatedDataException("Этот email уже используется");
+                }
+
+                User existingUser = users.get(userId);
+                if (existingUser == null || !emailLowerCase.equals(existingUser.getEmail().toLowerCase())) {
                     log.error("Email {} уже используется", email);
                     throw new DuplicatedDataException("Этот email уже используется");
                 }
