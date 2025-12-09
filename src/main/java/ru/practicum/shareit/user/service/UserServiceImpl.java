@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.DuplicatedDataException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.UserMapper;
@@ -14,28 +15,34 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
+    @Transactional
     public UserDto createUser(UserDto userDto) {
-
         if (userDto.getEmail() == null || userDto.getEmail().trim().isEmpty()) {
             throw new IllegalArgumentException("Email не может быть пустым");
         }
 
         User user = UserMapper.toUser(userDto);
-        User createdUser = userRepository.create(user);
+
+        boolean emailExists = userRepository.findAll().stream()
+                .anyMatch(u -> u.getEmail().equalsIgnoreCase(userDto.getEmail()));
+        if (emailExists) {
+            throw new DuplicatedDataException("Этот email уже используется");
+        }
+
+        User createdUser = userRepository.save(user);
         return UserMapper.toUserDto(createdUser);
     }
 
     @Override
+    @Transactional
     public UserDto updateUser(Long userId, UserDto userDto) {
-        User existingUser = userRepository.findUserById(userId);
-
-        if (existingUser == null) {
-            throw new NotFoundException("Пользователь с id " + userId + " не найден");
-        }
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
 
         if (userDto.getEmail() != null && !existingUser.getEmail().equals(userDto.getEmail())) {
             boolean emailExists = userRepository.findAll().stream()
@@ -53,17 +60,14 @@ public class UserServiceImpl implements UserService {
                 .email(userDto.getEmail() != null ? userDto.getEmail() : existingUser.getEmail())
                 .build();
 
-        User updatedUser = userRepository.update(updateUser);
+        User updatedUser = userRepository.save(updateUser);
         return UserMapper.toUserDto(updatedUser);
     }
 
     @Override
     public UserDto getUserById(Long userId) {
-        User user = userRepository.findUserById(userId);
-
-        if (user == null) {
-            throw new NotFoundException("Пользователь с id " + userId + " не найден");
-        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
 
         return UserMapper.toUserDto(user);
     }
@@ -76,7 +80,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long userId) {
-        userRepository.delete(userId);
+        userRepository.deleteById(userId);
     }
 }
