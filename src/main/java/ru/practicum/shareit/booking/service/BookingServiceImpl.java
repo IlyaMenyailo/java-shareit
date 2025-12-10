@@ -12,6 +12,8 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.booking.strategy.BookingStrategyFactory;
+import ru.practicum.shareit.booking.strategy.BookingStateStrategy;
 import ru.practicum.shareit.exception.IllegalArgumentException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.SecurityException;
@@ -31,6 +33,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
+    private final BookingStrategyFactory bookingStrategyFactory;
 
     @Override
     @Transactional
@@ -105,51 +108,15 @@ public class BookingServiceImpl implements BookingService {
 
         Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size, Sort.by(Sort.Direction.DESC, "start"));
 
-        BookingState bookingState;
-        try {
-            bookingState = BookingState.valueOf(state.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Unknown state: " + state);
-        }
+        BookingState bookingState = parseBookingState(state);
 
-        switch (bookingState) {
-            case ALL:
-                return bookingRepository.findByBookerIdOrderByStartDesc(userId, pageable)
-                        .stream()
-                        .map(BookingResponseDto::toDto)
-                        .collect(Collectors.toList());
-            case CURRENT:
-                return bookingRepository.findCurrentBookingsByBookerId(userId, LocalDateTime.now(), pageable)
-                        .stream()
-                        .map(BookingResponseDto::toDto)
-                        .collect(Collectors.toList());
-            case PAST:
-                return bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(
-                                userId, LocalDateTime.now(), pageable)
-                        .stream()
-                        .map(BookingResponseDto::toDto)
-                        .collect(Collectors.toList());
-            case FUTURE:
-                return bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(
-                                userId, LocalDateTime.now(), pageable)
-                        .stream()
-                        .map(BookingResponseDto::toDto)
-                        .collect(Collectors.toList());
-            case WAITING:
-                return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(
-                                userId, BookingStatus.WAITING, pageable)
-                        .stream()
-                        .map(BookingResponseDto::toDto)
-                        .collect(Collectors.toList());
-            case REJECTED:
-                return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(
-                                userId, BookingStatus.REJECTED, pageable)
-                        .stream()
-                        .map(BookingResponseDto::toDto)
-                        .collect(Collectors.toList());
-            default:
-                throw new IllegalArgumentException("Unknown state: " + state);
-        }
+        BookingStateStrategy strategy = bookingStrategyFactory.getUserStrategy(bookingState, pageable);
+
+        List<Booking> bookings = strategy.findBookings(userId, bookingRepository, LocalDateTime.now());
+
+        return bookings.stream()
+                .map(BookingResponseDto::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -159,46 +126,22 @@ public class BookingServiceImpl implements BookingService {
 
         Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size, Sort.by(Sort.Direction.DESC, "start"));
 
-        BookingState bookingState;
+        BookingState bookingState = parseBookingState(state);
+
+        BookingStateStrategy strategy = bookingStrategyFactory.getOwnerStrategy(bookingState, pageable);
+
+        List<Booking> bookings = strategy.findBookings(ownerId, bookingRepository, LocalDateTime.now());
+
+        return bookings.stream()
+                .map(BookingResponseDto::toDto)
+                .collect(Collectors.toList());
+    }
+
+    private BookingState parseBookingState(String state) {
         try {
-            bookingState = BookingState.valueOf(state.toUpperCase());
+            return BookingState.valueOf(state.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Unknown state: " + state);
-        }
-
-        switch (bookingState) {
-            case ALL:
-                return bookingRepository.findByItemOwnerId(ownerId, pageable)
-                        .stream()
-                        .map(BookingResponseDto::toDto)
-                        .collect(Collectors.toList());
-            case CURRENT:
-                return bookingRepository.findCurrentBookingsByItemOwnerId(ownerId, LocalDateTime.now(), pageable)
-                        .stream()
-                        .map(BookingResponseDto::toDto)
-                        .collect(Collectors.toList());
-            case PAST:
-                return bookingRepository.findPastBookingsByItemOwnerId(ownerId, LocalDateTime.now(), pageable)
-                        .stream()
-                        .map(BookingResponseDto::toDto)
-                        .collect(Collectors.toList());
-            case FUTURE:
-                return bookingRepository.findFutureBookingsByItemOwnerId(ownerId, LocalDateTime.now(), pageable)
-                        .stream()
-                        .map(BookingResponseDto::toDto)
-                        .collect(Collectors.toList());
-            case WAITING:
-                return bookingRepository.findByItemOwnerIdAndStatus(ownerId, BookingStatus.WAITING, pageable)
-                        .stream()
-                        .map(BookingResponseDto::toDto)
-                        .collect(Collectors.toList());
-            case REJECTED:
-                return bookingRepository.findByItemOwnerIdAndStatus(ownerId, BookingStatus.REJECTED, pageable)
-                        .stream()
-                        .map(BookingResponseDto::toDto)
-                        .collect(Collectors.toList());
-            default:
-                throw new IllegalArgumentException("Unknown state: " + state);
         }
     }
 }
