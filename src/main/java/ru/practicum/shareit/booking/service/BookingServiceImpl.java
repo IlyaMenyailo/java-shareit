@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.BookingState;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
@@ -104,36 +105,43 @@ public class BookingServiceImpl implements BookingService {
 
         Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size, Sort.by(Sort.Direction.DESC, "start"));
 
-        switch (state.toUpperCase()) {
-            case "ALL":
+        BookingState bookingState;
+        try {
+            bookingState = BookingState.valueOf(state.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Unknown state: " + state);
+        }
+
+        switch (bookingState) {
+            case ALL:
                 return bookingRepository.findByBookerIdOrderByStartDesc(userId, pageable)
                         .stream()
                         .map(BookingResponseDto::toDto)
                         .collect(Collectors.toList());
-            case "CURRENT":
+            case CURRENT:
                 return bookingRepository.findCurrentBookingsByBookerId(userId, LocalDateTime.now(), pageable)
                         .stream()
                         .map(BookingResponseDto::toDto)
                         .collect(Collectors.toList());
-            case "PAST":
+            case PAST:
                 return bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(
                                 userId, LocalDateTime.now(), pageable)
                         .stream()
                         .map(BookingResponseDto::toDto)
                         .collect(Collectors.toList());
-            case "FUTURE":
+            case FUTURE:
                 return bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(
                                 userId, LocalDateTime.now(), pageable)
                         .stream()
                         .map(BookingResponseDto::toDto)
                         .collect(Collectors.toList());
-            case "WAITING":
+            case WAITING:
                 return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(
                                 userId, BookingStatus.WAITING, pageable)
                         .stream()
                         .map(BookingResponseDto::toDto)
                         .collect(Collectors.toList());
-            case "REJECTED":
+            case REJECTED:
                 return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(
                                 userId, BookingStatus.REJECTED, pageable)
                         .stream()
@@ -151,33 +159,40 @@ public class BookingServiceImpl implements BookingService {
 
         Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size, Sort.by(Sort.Direction.DESC, "start"));
 
-        switch (state.toUpperCase()) {
-            case "ALL":
+        BookingState bookingState;
+        try {
+            bookingState = BookingState.valueOf(state.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Unknown state: " + state);
+        }
+
+        switch (bookingState) {
+            case ALL:
                 return bookingRepository.findByItemOwnerId(ownerId, pageable)
                         .stream()
                         .map(BookingResponseDto::toDto)
                         .collect(Collectors.toList());
-            case "CURRENT":
+            case CURRENT:
                 return bookingRepository.findCurrentBookingsByItemOwnerId(ownerId, LocalDateTime.now(), pageable)
                         .stream()
                         .map(BookingResponseDto::toDto)
                         .collect(Collectors.toList());
-            case "PAST":
+            case PAST:
                 return bookingRepository.findPastBookingsByItemOwnerId(ownerId, LocalDateTime.now(), pageable)
                         .stream()
                         .map(BookingResponseDto::toDto)
                         .collect(Collectors.toList());
-            case "FUTURE":
+            case FUTURE:
                 return bookingRepository.findFutureBookingsByItemOwnerId(ownerId, LocalDateTime.now(), pageable)
                         .stream()
                         .map(BookingResponseDto::toDto)
                         .collect(Collectors.toList());
-            case "WAITING":
+            case WAITING:
                 return bookingRepository.findByItemOwnerIdAndStatus(ownerId, BookingStatus.WAITING, pageable)
                         .stream()
                         .map(BookingResponseDto::toDto)
                         .collect(Collectors.toList());
-            case "REJECTED":
+            case REJECTED:
                 return bookingRepository.findByItemOwnerIdAndStatus(ownerId, BookingStatus.REJECTED, pageable)
                         .stream()
                         .map(BookingResponseDto::toDto)
