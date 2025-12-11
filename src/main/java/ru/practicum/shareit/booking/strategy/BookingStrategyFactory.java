@@ -1,49 +1,38 @@
 package ru.practicum.shareit.booking.strategy;
 
-import org.springframework.data.domain.Pageable;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.BookingState;
-import ru.practicum.shareit.booking.strategy.owner.*;
-import ru.practicum.shareit.booking.strategy.state.*;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
+@RequiredArgsConstructor
 public class BookingStrategyFactory {
+    private final List<BookingStateStrategy> strategies;
+    private final Map<String, BookingStateStrategy> strategyCache = new ConcurrentHashMap<>();
 
-    public BookingStateStrategy getUserStrategy(BookingState state, Pageable pageable) {
-        switch (state) {
-            case ALL:
-                return new AllBookingStateStrategy(pageable);
-            case CURRENT:
-                return new CurrentBookingStateStrategy(pageable);
-            case PAST:
-                return new PastBookingStateStrategy(pageable);
-            case FUTURE:
-                return new FutureBookingStateStrategy(pageable);
-            case WAITING:
-                return new WaitingBookingStateStrategy(pageable);
-            case REJECTED:
-                return new RejectedBookingStateStrategy(pageable);
-            default:
-                throw new IllegalArgumentException("Unknown state: " + state);
-        }
+    public BookingStateStrategy getUserStrategy(BookingState state) {
+        String key = createKey(state, false);
+        return strategyCache.computeIfAbsent(key, k -> findStrategy(state, false));
     }
 
-    public BookingStateStrategy getOwnerStrategy(BookingState state, Pageable pageable) {
-        switch (state) {
-            case ALL:
-                return new OwnerAllBookingStateStrategy(pageable);
-            case CURRENT:
-                return new OwnerCurrentBookingStateStrategy(pageable);
-            case PAST:
-                return new OwnerPastBookingStateStrategy(pageable);
-            case FUTURE:
-                return new OwnerFutureBookingStateStrategy(pageable);
-            case WAITING:
-                return new OwnerWaitingBookingStateStrategy(pageable);
-            case REJECTED:
-                return new OwnerRejectedBookingStateStrategy(pageable);
-            default:
-                throw new IllegalArgumentException("Unknown state: " + state);
-        }
+    public BookingStateStrategy getOwnerStrategy(BookingState state) {
+        String key = createKey(state, true);
+        return strategyCache.computeIfAbsent(key, k -> findStrategy(state, true));
+    }
+
+    private BookingStateStrategy findStrategy(BookingState state, boolean forOwner) {
+        return strategies.stream()
+                .filter(strategy -> strategy.getState() == state && strategy.isForOwner() == forOwner)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        String.format("Strategy for state '%s' and owner=%s not found", state, forOwner)));
+    }
+
+    private String createKey(BookingState state, boolean forOwner) {
+        return state.name() + "_" + (forOwner ? "OWNER" : "USER");
     }
 }

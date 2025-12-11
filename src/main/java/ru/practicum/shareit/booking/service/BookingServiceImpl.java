@@ -110,9 +110,9 @@ public class BookingServiceImpl implements BookingService {
 
         BookingState bookingState = parseBookingState(state);
 
-        BookingStateStrategy strategy = bookingStrategyFactory.getUserStrategy(bookingState, pageable);
+        BookingStateStrategy strategy = bookingStrategyFactory.getUserStrategy(bookingState);
 
-        List<Booking> bookings = strategy.findBookings(userId, bookingRepository, LocalDateTime.now());
+        List<Booking> bookings = strategy.findBookings(userId, bookingRepository, LocalDateTime.now(), pageable);
 
         return bookings.stream()
                 .map(BookingResponseDto::toDto)
@@ -128,9 +128,9 @@ public class BookingServiceImpl implements BookingService {
 
         BookingState bookingState = parseBookingState(state);
 
-        BookingStateStrategy strategy = bookingStrategyFactory.getOwnerStrategy(bookingState, pageable);
+        BookingStateStrategy strategy = bookingStrategyFactory.getOwnerStrategy(bookingState);
 
-        List<Booking> bookings = strategy.findBookings(ownerId, bookingRepository, LocalDateTime.now());
+        List<Booking> bookings = strategy.findBookings(ownerId, bookingRepository, LocalDateTime.now(), pageable);
 
         return bookings.stream()
                 .map(BookingResponseDto::toDto)
