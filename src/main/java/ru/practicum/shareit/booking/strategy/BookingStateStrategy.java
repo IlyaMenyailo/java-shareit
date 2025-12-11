@@ -10,7 +10,9 @@ import java.util.List;
 
 public interface BookingStateStrategy {
     BookingState getState();
+
     boolean isForOwner();
+
     List<Booking> findBookings(Long userId, BookingRepository bookingRepository,
                                LocalDateTime now, Pageable pageable);
 }
