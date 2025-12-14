@@ -36,3 +36,8 @@ CREATE TABLE IF NOT EXISTS comments (
     author_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     created TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );
+
+CREATE INDEX IF NOT EXISTS idx_items_request_id ON items(request_id);
+
+CREATE INDEX IF NOT EXISTS idx_requests_created ON requests(created DESC);
+CREATE INDEX IF NOT EXISTS idx_requests_requestor_created ON requests(requestor_id, created DESC);
