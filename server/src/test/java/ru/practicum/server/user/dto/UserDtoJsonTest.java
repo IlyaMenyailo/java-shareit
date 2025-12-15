@@ -12,6 +12,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import ru.practicum.shareit.user.dto.UserDto;
 
 import java.io.IOException;
 import java.util.Set;

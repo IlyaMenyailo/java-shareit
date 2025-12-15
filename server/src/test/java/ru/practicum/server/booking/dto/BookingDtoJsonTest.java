@@ -8,12 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
-import ru.practicum.server.booking.BookingStatus;
+import ru.practicum.shareit.booking.BookingStatus;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import ru.practicum.shareit.booking.dto.BookingDto;
 
 import java.io.IOException;
 import java.time.LocalDateTime;

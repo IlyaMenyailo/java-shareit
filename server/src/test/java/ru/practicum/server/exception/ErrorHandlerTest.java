@@ -6,10 +6,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.server.item.ItemController;
-import ru.practicum.server.item.dto.ItemDto;
-import ru.practicum.server.item.service.ItemService;
-import ru.practicum.server.util.HttpHeaders;
+import ru.practicum.shareit.exception.DuplicatedDataException;
+import ru.practicum.shareit.exception.IllegalArgumentException;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.SecurityException;
+import ru.practicum.shareit.item.ItemController;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.util.HttpHeaders;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;

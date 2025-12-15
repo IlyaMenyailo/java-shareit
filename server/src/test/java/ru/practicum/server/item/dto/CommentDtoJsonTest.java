@@ -13,6 +13,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import ru.practicum.shareit.item.dto.CommentDto;
 
 import java.io.IOException;
 import java.time.LocalDateTime;

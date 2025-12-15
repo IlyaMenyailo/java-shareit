@@ -11,6 +11,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import ru.practicum.shareit.request.dto.ItemRequestShortDto;
 
 import java.io.IOException;
 import java.util.Set;
