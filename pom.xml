@@ -101,7 +101,6 @@
                     <version>0.8.12</version>
                     <configuration>
                         <output>file</output>
-                        <skip>true</skip>
                     </configuration>
                     <executions>
                         <execution>
