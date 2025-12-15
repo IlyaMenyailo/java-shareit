@@ -8,7 +8,6 @@ import ru.practicum.server.item.dto.CommentDto;
 import ru.practicum.server.item.dto.CreateCommentDto;
 import ru.practicum.server.item.dto.ItemDto;
 import ru.practicum.server.item.dto.ItemWithBookingsDto;
-import ru.practicum.server.item.dto.*;
 import ru.practicum.server.item.service.ItemService;
 import ru.practicum.server.util.HttpHeaders;
 
