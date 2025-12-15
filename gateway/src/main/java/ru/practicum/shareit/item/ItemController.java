@@ -47,7 +47,6 @@ public class ItemController {
                                                   @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
                                                   @Positive @RequestParam(defaultValue = "10") Integer size) {
         log.info("Getting items for ownerId: {}, from: {}, size: {}", ownerId, from, size);
-        // Если в сервере нет пагинации для этого эндпоинта, просто вызываем без параметров
         return itemClient.getItemsByOwner(ownerId);
     }
 
