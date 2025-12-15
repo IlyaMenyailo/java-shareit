@@ -12,6 +12,7 @@
     <groupId>ru.practicum</groupId>
     <artifactId>shareit</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
     <name>ShareIt</name>
 
@@ -19,11 +20,13 @@
         <java.version>21</java.version>
     </properties>
 
+    <modules>
+        <module>gateway</module>
+        <module>server</module>
+    </modules>
+
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
@@ -75,7 +78,7 @@
     <build>
         <resources>
             <resource>
-                <directory>src/main/resources</directory>
+                <directory>server/src/main/resources</directory>
                 <filtering>true</filtering>
             </resource>
         </resources>
