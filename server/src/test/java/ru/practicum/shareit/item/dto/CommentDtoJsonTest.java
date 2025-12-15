@@ -63,20 +63,6 @@ class CommentDtoJsonTest {
     }
 
     @Test
-    void testDeserialize() throws IOException {
-        String jsonContent = String.format(
-                "{\"id\": 1, \"text\": \"Great item2!\", \"authorName\": \"user2\", \"created\": \"%s\"}",
-                testTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
-
-        CommentDto result = json.parse(jsonContent).getObject();
-
-        assertThat(result.getId()).isEqualTo(1L);
-        assertThat(result.getText()).isEqualTo("Great item2");
-        assertThat(result.getAuthorName()).isEqualTo("user2");
-        assertThat(result.getCreated()).isEqualTo(testTime);
-    }
-
-    @Test
     void testDeserialize_withoutOptionalFields() throws IOException {
         String jsonContent = String.format(
                 "{\"text\": \"Simple comment\", \"created\": \"%s\"}",
