@@ -1,8 +1,5 @@
 package ru.practicum.shareit.request;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +18,7 @@ public class ItemRequestController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ItemRequestDto createItemRequest(@Valid @RequestBody ItemRequestShortDto itemRequestShortDto,
+    public ItemRequestDto createItemRequest(@RequestBody ItemRequestShortDto itemRequestShortDto,
                                             @RequestHeader(HttpHeaders.USER_ID_HEADER) Long userId) {
         return itemRequestService.createItemRequest(userId, itemRequestShortDto);
     }
@@ -33,8 +30,8 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public List<ItemRequestDto> getAllItemRequests(@RequestHeader(HttpHeaders.USER_ID_HEADER) Long userId,
-                                                   @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
-                                                   @Positive @RequestParam(defaultValue = "10") Integer size) {
+                                                   @RequestParam(defaultValue = "0") Integer from,
+                                                   @RequestParam(defaultValue = "10") Integer size) {
         return itemRequestService.getAllItemRequests(userId, from, size);
     }
 

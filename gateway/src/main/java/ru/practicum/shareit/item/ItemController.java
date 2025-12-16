@@ -47,7 +47,7 @@ public class ItemController {
                                                   @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
                                                   @Positive @RequestParam(defaultValue = "10") Integer size) {
         log.info("Getting items for ownerId: {}, from: {}, size: {}", ownerId, from, size);
-        return itemClient.getItemsByOwner(ownerId);
+        return itemClient.getItemsByOwner(ownerId, from, size);
     }
 
     @GetMapping("/search")
@@ -58,7 +58,7 @@ public class ItemController {
         if (text == null || text.isBlank()) {
             return ResponseEntity.ok(Collections.emptyList());
         }
-        return itemClient.searchItems(text);
+        return itemClient.searchItems(text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")

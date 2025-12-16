@@ -10,19 +10,12 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @JsonTest
 class ItemWithBookingsDtoJsonTest {
@@ -31,17 +24,12 @@ class ItemWithBookingsDtoJsonTest {
     private JacksonTester<ItemWithBookingsDto> json;
 
     private ObjectMapper objectMapper;
-    private Validator validator;
     private LocalDateTime testTime;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
-
         testTime = LocalDateTime.of(2024, 1, 1, 12, 0, 0);
     }
 
@@ -144,51 +132,6 @@ class ItemWithBookingsDtoJsonTest {
         assertThat(result.getLastBooking()).isNull();
         assertThat(result.getNextBooking()).isNull();
         assertThat(result.getComments()).isNull();
-    }
-
-    @Test
-    void testValidation_validDto() {
-        ItemWithBookingsDto dto = ItemWithBookingsDto.builder()
-                .name("Valid Item")
-                .description("Valid description")
-                .available(true)
-                .build();
-
-        Set<ConstraintViolation<ItemWithBookingsDto>> violations = validator.validate(dto);
-
-        assertTrue(violations.isEmpty());
-    }
-
-    @Test
-    void testValidation_emptyName() {
-        ItemWithBookingsDto dto = ItemWithBookingsDto.builder()
-                .name("")
-                .description("Valid description")
-                .available(true)
-                .build();
-
-        Set<ConstraintViolation<ItemWithBookingsDto>> violations = validator.validate(dto);
-
-        assertFalse(violations.isEmpty());
-        assertTrue(violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("name")
-                        && v.getMessage().contains("не может быть пустым")));
-    }
-
-    @Test
-    void testValidation_nullAvailable() {
-        ItemWithBookingsDto dto = ItemWithBookingsDto.builder()
-                .name("Valid name")
-                .description("Valid description")
-                .available(null)
-                .build();
-
-        Set<ConstraintViolation<ItemWithBookingsDto>> violations = validator.validate(dto);
-
-        assertFalse(violations.isEmpty());
-        assertTrue(violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("available")
-                        && v.getMessage().contains("не может быть пустым")));
     }
 
     @Test

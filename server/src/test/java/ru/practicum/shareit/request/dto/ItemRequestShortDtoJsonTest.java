@@ -7,16 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
-
 import java.io.IOException;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @JsonTest
 class ItemRequestShortDtoJsonTest {
@@ -25,14 +18,10 @@ class ItemRequestShortDtoJsonTest {
     private JacksonTester<ItemRequestShortDto> json;
 
     private ObjectMapper objectMapper;
-    private Validator validator;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
     }
 
     @Test
@@ -53,82 +42,6 @@ class ItemRequestShortDtoJsonTest {
         ItemRequestShortDto result = json.parse(jsonContent).getObject();
 
         assertThat(result.getDescription()).isEqualTo("Looking for a ladder");
-    }
-
-    @Test
-    void testValidation_validDto() {
-        ItemRequestShortDto dto = ItemRequestShortDto.builder()
-                .description("Valid description")
-                .build();
-
-        Set<ConstraintViolation<ItemRequestShortDto>> violations = validator.validate(dto);
-
-        assertTrue(violations.isEmpty());
-    }
-
-    @Test
-    void testValidation_emptyDescription() {
-        ItemRequestShortDto dto = ItemRequestShortDto.builder()
-                .description("")
-                .build();
-
-        Set<ConstraintViolation<ItemRequestShortDto>> violations = validator.validate(dto);
-
-        assertFalse(violations.isEmpty());
-        assertTrue(violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("description")
-                        && v.getMessage().contains("не может быть пустым")));
-    }
-
-    @Test
-    void testValidation_nullDescription() {
-        ItemRequestShortDto dto = ItemRequestShortDto.builder()
-                .description(null)
-                .build();
-
-        Set<ConstraintViolation<ItemRequestShortDto>> violations = validator.validate(dto);
-
-        assertFalse(violations.isEmpty());
-        assertTrue(violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("description")
-                        && v.getMessage().contains("не может быть пустым")));
-    }
-
-    @Test
-    void testValidation_blankDescription() {
-        ItemRequestShortDto dto = ItemRequestShortDto.builder()
-                .description("   ")
-                .build();
-
-        Set<ConstraintViolation<ItemRequestShortDto>> violations = validator.validate(dto);
-
-        assertFalse(violations.isEmpty());
-        assertTrue(violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("description")
-                        && v.getMessage().contains("не может быть пустым")));
-    }
-
-    @Test
-    void testValidation_shortDescription() {
-        ItemRequestShortDto dto = ItemRequestShortDto.builder()
-                .description("A")
-                .build();
-
-        Set<ConstraintViolation<ItemRequestShortDto>> violations = validator.validate(dto);
-
-        assertTrue(violations.isEmpty()); // No min length constraint
-    }
-
-    @Test
-    void testValidation_longDescription() {
-        String longDescription = "A".repeat(5000);
-        ItemRequestShortDto dto = ItemRequestShortDto.builder()
-                .description(longDescription)
-                .build();
-
-        Set<ConstraintViolation<ItemRequestShortDto>> violations = validator.validate(dto);
-
-        assertTrue(violations.isEmpty()); // No max length constraint
     }
 
     @Test

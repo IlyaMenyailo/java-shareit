@@ -6,6 +6,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -245,22 +248,26 @@ class ItemServiceImplTest {
 
     @Test
     void searchItems_shouldReturnEmptyListForEmptyText() {
-        List<ItemDto> result = itemService.searchItems("   ");
+        List<ItemDto> result = itemService.searchItems("   ", 0, 10);
 
         assertTrue(result.isEmpty());
-        verify(itemRepository, never()).search(anyString());
+        verify(itemRepository, never()).search(anyString(), any(Pageable.class));
     }
 
     @Test
-    void searchItems_shouldReturnItemsForValidText() {
+    void searchItems_shouldReturnItemsForValidTextWithPagination() {
         String searchText = "item";
-        when(itemRepository.search(searchText)).thenReturn(List.of(item));
+        Page<Item> itemPage = new PageImpl<>(List.of(item));
 
-        List<ItemDto> result = itemService.searchItems(searchText);
+        when(itemRepository.search(eq(searchText), any(Pageable.class)))
+                .thenReturn(itemPage);
+
+        List<ItemDto> result = itemService.searchItems(searchText, 0, 10);
 
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
         assertEquals(item.getName(), result.get(0).getName());
+        verify(itemRepository).search(eq(searchText), any(Pageable.class));
     }
 
     @Test

@@ -40,13 +40,21 @@ public class ItemClient extends BaseClient {
         return get("/" + itemId, userId);
     }
 
-    public ResponseEntity<Object> getItemsByOwner(Long ownerId) {
-        return get("", ownerId);
+    public ResponseEntity<Object> getItemsByOwner(Long ownerId, Integer from, Integer size) {
+        Map<String, Object> parameters = Map.of(
+                "from", from,
+                "size", size
+        );
+        return get("?from={from}&size={size}", ownerId, parameters);
     }
 
-    public ResponseEntity<Object> searchItems(String text) {
-        Map<String, Object> parameters = Map.of("text", text);
-        return get("/search?text={text}", null, parameters);
+    public ResponseEntity<Object> searchItems(String text, Integer from, Integer size) {
+        Map<String, Object> parameters = Map.of(
+                "text", text,
+                "from", from,
+                "size", size
+        );
+        return get("/search?text={text}&from={from}&size={size}", null, parameters);
     }
 
     public ResponseEntity<Object> addComment(Long itemId, Long userId, CreateCommentDto commentDto) {

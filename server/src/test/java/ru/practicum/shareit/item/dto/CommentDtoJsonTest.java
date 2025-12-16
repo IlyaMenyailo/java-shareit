@@ -9,18 +9,11 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @JsonTest
 class CommentDtoJsonTest {
@@ -29,16 +22,12 @@ class CommentDtoJsonTest {
     private JacksonTester<CommentDto> json;
 
     private ObjectMapper objectMapper;
-    private Validator validator;
     private LocalDateTime testTime;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
 
         testTime = LocalDateTime.of(2024, 1, 1, 12, 0, 0);
     }
@@ -74,76 +63,6 @@ class CommentDtoJsonTest {
         assertThat(result.getCreated()).isEqualTo(testTime);
         assertThat(result.getId()).isNull();
         assertThat(result.getAuthorName()).isNull();
-    }
-
-    @Test
-    void testValidation_validComment() {
-        CommentDto commentDto = CommentDto.builder()
-                .text("Valid comment text")
-                .created(testTime)
-                .build();
-
-        Set<ConstraintViolation<CommentDto>> violations = validator.validate(commentDto);
-
-        assertTrue(violations.isEmpty());
-    }
-
-    @Test
-    void testValidation_emptyText() {
-        CommentDto commentDto = CommentDto.builder()
-                .text("")
-                .created(testTime)
-                .build();
-
-        Set<ConstraintViolation<CommentDto>> violations = validator.validate(commentDto);
-
-        assertFalse(violations.isEmpty());
-        assertTrue(violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("text")
-                        && v.getMessage().contains("не может быть пустым")));
-    }
-
-    @Test
-    void testValidation_nullText() {
-        CommentDto commentDto = CommentDto.builder()
-                .text(null)
-                .created(testTime)
-                .build();
-
-        Set<ConstraintViolation<CommentDto>> violations = validator.validate(commentDto);
-
-        assertFalse(violations.isEmpty());
-        assertTrue(violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("text")
-                        && v.getMessage().contains("не может быть пустым")));
-    }
-
-    @Test
-    void testValidation_blankText() {
-        CommentDto commentDto = CommentDto.builder()
-                .text("   ")
-                .created(testTime)
-                .build();
-
-        Set<ConstraintViolation<CommentDto>> violations = validator.validate(commentDto);
-
-        assertFalse(violations.isEmpty());
-        assertTrue(violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("text")
-                        && v.getMessage().contains("не может быть пустым")));
-    }
-
-    @Test
-    void testValidation_longText() {
-        String longText = "A".repeat(1000);
-        CommentDto commentDto = CommentDto.builder()
-                .text(longText)
-                .created(testTime)
-                .build();
-
-        Set<ConstraintViolation<CommentDto>> violations = validator.validate(commentDto);
-
-        assertTrue(violations.isEmpty()); // No max length constraint
     }
 
     @Test

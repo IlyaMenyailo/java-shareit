@@ -114,16 +114,32 @@ class ItemControllerTest {
         ItemWithBookingsDto item1 = ItemWithBookingsDto.builder().id(1L).name("Item1").build();
         ItemWithBookingsDto item2 = ItemWithBookingsDto.builder().id(2L).name("Item2").build();
 
-        when(itemService.getItemsByOwner(1L))
+        when(itemService.getItemsByOwner(eq(1L), anyInt(), anyInt()))
                 .thenReturn(List.of(item1, item2));
 
         mockMvc.perform(get("/items")
-                        .header(HttpHeaders.USER_ID_HEADER, 1L))
+                        .header(HttpHeaders.USER_ID_HEADER, 1L)
+                        .param("from", "0")
+                        .param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[1].id").value(2));
 
-        verify(itemService).getItemsByOwner(1L);
+        verify(itemService).getItemsByOwner(eq(1L), eq(0), eq(10));
+    }
+
+    @Test
+    void getItemsByOwner_withDefaultPagination_shouldUseDefaults() throws Exception {
+        ItemWithBookingsDto item1 = ItemWithBookingsDto.builder().id(1L).name("Item1").build();
+
+        when(itemService.getItemsByOwner(eq(1L), eq(0), eq(10)))
+                .thenReturn(List.of(item1));
+
+        mockMvc.perform(get("/items")
+                        .header(HttpHeaders.USER_ID_HEADER, 1L))
+                .andExpect(status().isOk());
+
+        verify(itemService).getItemsByOwner(eq(1L), eq(0), eq(10));
     }
 
     @Test
@@ -131,16 +147,44 @@ class ItemControllerTest {
         ItemDto item1 = ItemDto.builder().id(1L).name("Drill").build();
         ItemDto item2 = ItemDto.builder().id(2L).name("Hammer").build();
 
-        when(itemService.searchItems("tool"))
+        when(itemService.searchItems(eq("tool"), anyInt(), anyInt()))
                 .thenReturn(List.of(item1, item2));
 
         mockMvc.perform(get("/items/search")
-                        .param("text", "tool"))
+                        .param("text", "tool")
+                        .param("from", "0")
+                        .param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[1].id").value(2));
 
-        verify(itemService).searchItems("tool");
+        verify(itemService).searchItems(eq("tool"), eq(0), eq(10));
+    }
+
+    @Test
+    void searchItems_withEmptyText_shouldReturnEmptyList() throws Exception {
+        mockMvc.perform(get("/items/search")
+                        .param("text", "")
+                        .param("from", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
+
+        verify(itemService, never()).searchItems(anyString(), anyInt(), anyInt());
+    }
+
+    @Test
+    void searchItems_withBlankText_shouldReturnEmptyList() throws Exception {
+        mockMvc.perform(get("/items/search")
+                        .param("text", "   ")
+                        .param("from", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
+
+        verify(itemService, never()).searchItems(anyString(), anyInt(), anyInt());
     }
 
     @Test

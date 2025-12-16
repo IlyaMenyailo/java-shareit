@@ -10,18 +10,11 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import ru.practicum.shareit.booking.BookingStatus;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @JsonTest
 class BookingDtoJsonTest {
@@ -30,7 +23,6 @@ class BookingDtoJsonTest {
     private JacksonTester<BookingDto> json;
 
     private ObjectMapper objectMapper;
-    private Validator validator;
     private LocalDateTime testStartTime;
     private LocalDateTime testEndTime;
 
@@ -38,9 +30,6 @@ class BookingDtoJsonTest {
     void setUp() {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
 
         testStartTime = LocalDateTime.of(2024, 1, 1, 10, 0, 0);
         testEndTime = LocalDateTime.of(2024, 1, 2, 10, 0, 0);
@@ -99,102 +88,6 @@ class BookingDtoJsonTest {
         assertThat(result.getItemId()).isEqualTo(100L);
         assertThat(result.getId()).isNull();
         assertThat(result.getStatus()).isNull();
-    }
-
-    @Test
-    void testValidation_nullStart() {
-        BookingDto bookingDto = BookingDto.builder()
-                .start(null)
-                .end(testEndTime)
-                .itemId(100L)
-                .build();
-
-        Set<ConstraintViolation<BookingDto>> violations = validator.validate(bookingDto);
-
-        assertFalse(violations.isEmpty());
-        assertTrue(violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("start")
-                        && v.getMessage().contains("не может быть пустой")));
-    }
-
-    @Test
-    void testValidation_pastStart() {
-        BookingDto bookingDto = BookingDto.builder()
-                .start(LocalDateTime.now().minusDays(1))
-                .end(LocalDateTime.now().plusDays(1))
-                .itemId(100L)
-                .build();
-
-        Set<ConstraintViolation<BookingDto>> violations = validator.validate(bookingDto);
-
-        assertFalse(violations.isEmpty());
-        assertTrue(violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("start")
-                        && v.getMessage().contains("должна быть в настоящем или будущем")));
-    }
-
-    @Test
-    void testValidation_nullEnd() {
-        BookingDto bookingDto = BookingDto.builder()
-                .start(testStartTime)
-                .end(null)
-                .itemId(100L)
-                .build();
-
-        Set<ConstraintViolation<BookingDto>> violations = validator.validate(bookingDto);
-
-        assertFalse(violations.isEmpty());
-        assertTrue(violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("end")
-                        && v.getMessage().contains("не может быть пустой")));
-    }
-
-    @Test
-    void testValidation_pastEnd() {
-        BookingDto bookingDto = BookingDto.builder()
-                .start(LocalDateTime.now().plusDays(1))
-                .end(LocalDateTime.now().minusDays(1))
-                .itemId(100L)
-                .build();
-
-        Set<ConstraintViolation<BookingDto>> violations = validator.validate(bookingDto);
-
-        assertFalse(violations.isEmpty());
-        assertTrue(violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("end")
-                        && v.getMessage().contains("должна быть в будущем")));
-    }
-
-    @Test
-    void testValidation_presentEnd() {
-        BookingDto bookingDto = BookingDto.builder()
-                .start(LocalDateTime.now().plusDays(1))
-                .end(LocalDateTime.now())
-                .itemId(100L)
-                .build();
-
-        Set<ConstraintViolation<BookingDto>> violations = validator.validate(bookingDto);
-
-        assertFalse(violations.isEmpty());
-        assertTrue(violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("end")
-                        && v.getMessage().contains("должна быть в будущем")));
-    }
-
-    @Test
-    void testValidation_nullItemId() {
-        BookingDto bookingDto = BookingDto.builder()
-                .start(testStartTime)
-                .end(testEndTime)
-                .itemId(null)
-                .build();
-
-        Set<ConstraintViolation<BookingDto>> violations = validator.validate(bookingDto);
-
-        assertFalse(violations.isEmpty());
-        assertTrue(violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("itemId")
-                        && v.getMessage().contains("не может быть пустым")));
     }
 
     @Test

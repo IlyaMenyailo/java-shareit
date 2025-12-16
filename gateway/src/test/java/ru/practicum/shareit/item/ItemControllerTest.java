@@ -132,14 +132,16 @@ class ItemControllerTest {
 
     @Test
     void getItemsByOwner_shouldCallClientAndReturnOk() throws Exception {
-        when(itemClient.getItemsByOwner(ownerId))
+        when(itemClient.getItemsByOwner(eq(ownerId), anyInt(), anyInt()))
                 .thenReturn(new ResponseEntity<>("[]", HttpStatus.OK));
 
         mockMvc.perform(get("/items")
-                        .header(HttpHeaders.USER_ID_HEADER, ownerId))
+                        .header(HttpHeaders.USER_ID_HEADER, ownerId)
+                        .param("from", "0")
+                        .param("size", "10"))
                 .andExpect(status().isOk());
 
-        verify(itemClient).getItemsByOwner(ownerId);
+        verify(itemClient).getItemsByOwner(eq(ownerId), eq(0), eq(10));
     }
 
     @Test
@@ -147,30 +149,34 @@ class ItemControllerTest {
         mockMvc.perform(get("/items"))
                 .andExpect(status().isBadRequest());
 
-        verify(itemClient, never()).getItemsByOwner(any());
+        verify(itemClient, never()).getItemsByOwner(any(), anyInt(), anyInt());
     }
 
     @Test
     void searchItems_shouldCallClientAndReturnOk() throws Exception {
-        when(itemClient.searchItems("дрель"))
+        when(itemClient.searchItems(eq("дрель"), anyInt(), anyInt()))
                 .thenReturn(new ResponseEntity<>("[]", HttpStatus.OK));
 
         mockMvc.perform(get("/items/search")
-                        .param("text", "дрель"))
+                        .param("text", "дрель")
+                        .param("from", "0")
+                        .param("size", "10"))
                 .andExpect(status().isOk());
 
-        verify(itemClient).searchItems("дрель");
+        verify(itemClient).searchItems(eq("дрель"), eq(0), eq(10));
     }
 
     @Test
     void searchItems_withEmptyText_shouldReturnEmptyList() throws Exception {
         mockMvc.perform(get("/items/search")
-                        .param("text", ""))
+                        .param("text", "")
+                        .param("from", "0")
+                        .param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
 
-        verify(itemClient, never()).searchItems(any());
+        verify(itemClient, never()).searchItems(any(), anyInt(), anyInt());
     }
 
     @Test
@@ -180,7 +186,7 @@ class ItemControllerTest {
                         .param("from", "-1"))
                 .andExpect(status().isBadRequest());
 
-        verify(itemClient, never()).searchItems(any());
+        verify(itemClient, never()).searchItems(any(), anyInt(), anyInt());
     }
 
     @Test

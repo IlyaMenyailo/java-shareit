@@ -120,8 +120,8 @@ class ItemServiceImplIntegrationTest {
     }
 
     @Test
-    void getItemsByOwner_shouldReturnOwnerItems() {
-        List<ItemWithBookingsDto> result = itemService.getItemsByOwner(ownerId);
+    void getItemsByOwner_shouldReturnOwnerItemsWithPagination() {
+        List<ItemWithBookingsDto> result = itemService.getItemsByOwner(ownerId, 0, 10);
 
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
@@ -129,8 +129,8 @@ class ItemServiceImplIntegrationTest {
     }
 
     @Test
-    void searchItems_shouldReturnMatchingItems() {
-        List<ItemDto> result = itemService.searchItems("item");
+    void searchItems_shouldReturnMatchingItemsWithPagination() {
+        List<ItemDto> result = itemService.searchItems("item", 0, 10);
 
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
@@ -139,7 +139,7 @@ class ItemServiceImplIntegrationTest {
 
     @Test
     void searchItems_withEmptyText_shouldReturnEmptyList() {
-        List<ItemDto> result = itemService.searchItems("");
+        List<ItemDto> result = itemService.searchItems("", 0, 10);
 
         assertTrue(result.isEmpty());
     }

@@ -7,16 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
-
 import java.io.IOException;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @JsonTest
 class CreateCommentDtoJsonTest {
@@ -25,14 +18,10 @@ class CreateCommentDtoJsonTest {
     private JacksonTester<CreateCommentDto> json;
 
     private ObjectMapper objectMapper;
-    private Validator validator;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
     }
 
     @Test
@@ -53,71 +42,6 @@ class CreateCommentDtoJsonTest {
         CreateCommentDto result = json.parse(jsonContent).getObject();
 
         assertThat(result.getText()).isEqualTo("Great product, it works perfect!");
-    }
-
-    @Test
-    void testValidation_validDto() {
-        CreateCommentDto dto = CreateCommentDto.builder()
-                .text("Valid comment text")
-                .build();
-
-        Set<ConstraintViolation<CreateCommentDto>> violations = validator.validate(dto);
-
-        assertTrue(violations.isEmpty());
-    }
-
-    @Test
-    void testValidation_emptyText() {
-        CreateCommentDto dto = CreateCommentDto.builder()
-                .text("")
-                .build();
-
-        Set<ConstraintViolation<CreateCommentDto>> violations = validator.validate(dto);
-
-        assertFalse(violations.isEmpty());
-        assertTrue(violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("text")
-                        && v.getMessage().contains("не может быть пустым")));
-    }
-
-    @Test
-    void testValidation_nullText() {
-        CreateCommentDto dto = CreateCommentDto.builder()
-                .text(null)
-                .build();
-
-        Set<ConstraintViolation<CreateCommentDto>> violations = validator.validate(dto);
-
-        assertFalse(violations.isEmpty());
-        assertTrue(violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("text")
-                        && v.getMessage().contains("не может быть пустым")));
-    }
-
-    @Test
-    void testValidation_blankText() {
-        CreateCommentDto dto = CreateCommentDto.builder()
-                .text("   ")
-                .build();
-
-        Set<ConstraintViolation<CreateCommentDto>> violations = validator.validate(dto);
-
-        assertFalse(violations.isEmpty());
-        assertTrue(violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("text")
-                        && v.getMessage().contains("не может быть пустым")));
-    }
-
-    @Test
-    void testValidation_longText() {
-        String longText = "A".repeat(5000);
-        CreateCommentDto dto = CreateCommentDto.builder()
-                .text(longText)
-                .build();
-
-        Set<ConstraintViolation<CreateCommentDto>> violations = validator.validate(dto);
-
-        assertTrue(violations.isEmpty()); // No max length constraint
     }
 
     @Test

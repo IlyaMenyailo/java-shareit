@@ -8,13 +8,7 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
-
 import java.io.IOException;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,14 +20,10 @@ class UserDtoJsonTest {
     private JacksonTester<UserDto> json;
 
     private ObjectMapper objectMapper;
-    private Validator validator;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
     }
 
     @Test
@@ -71,132 +61,6 @@ class UserDtoJsonTest {
         assertThat(result.getName()).isEqualTo("User1");
         assertThat(result.getEmail()).isEqualTo("user1@yandex.ru");
         assertThat(result.getId()).isNull();
-    }
-
-    @Test
-    void testValidation_validUser() {
-        UserDto userDto = UserDto.builder()
-                .name("Valid User")
-                .email("valid@example.com")
-                .build();
-
-        Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
-
-        assertTrue(violations.isEmpty());
-    }
-
-    @Test
-    void testValidation_emptyName() {
-        UserDto userDto = UserDto.builder()
-                .name("")
-                .email("test@example.com")
-                .build();
-
-        Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
-
-        assertFalse(violations.isEmpty());
-        assertTrue(violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("name")
-                        && v.getMessage().contains("не может быть пустым")));
-    }
-
-    @Test
-    void testValidation_nullName() {
-        UserDto userDto = UserDto.builder()
-                .name(null)
-                .email("test@example.com")
-                .build();
-
-        Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
-
-        assertFalse(violations.isEmpty());
-        assertTrue(violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("name")
-                        && v.getMessage().contains("не может быть пустым")));
-    }
-
-    @Test
-    void testValidation_blankName() {
-        UserDto userDto = UserDto.builder()
-                .name("   ")
-                .email("test@example.com")
-                .build();
-
-        Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
-
-        assertFalse(violations.isEmpty());
-        assertTrue(violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("name")
-                        && v.getMessage().contains("не может быть пустым")));
-    }
-
-    @Test
-    void testValidation_nullEmail() {
-        UserDto userDto = UserDto.builder()
-                .name("Test User")
-                .email(null)
-                .build();
-
-        Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
-
-        assertFalse(violations.isEmpty());
-        assertTrue(violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("email")
-                        && v.getMessage().contains("не может быть пустым")));
-    }
-
-    @Test
-    void testValidation_emptyEmail() {
-        UserDto userDto = UserDto.builder()
-                .name("Test User")
-                .email("")
-                .build();
-
-        Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
-
-        assertFalse(violations.isEmpty());
-        boolean hasViolation = violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("email"));
-        assertTrue(hasViolation);
-    }
-
-    @Test
-    void testValidation_invalidEmailFormat() {
-        UserDto userDto = UserDto.builder()
-                .name("Test User")
-                .email("invalid-email")
-                .build();
-
-        Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
-
-        assertFalse(violations.isEmpty());
-        assertTrue(violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("email")
-                        && v.getMessage().contains("Некорректный формат email")));
-    }
-
-    @Test
-    void testValidation_validEmailWithDifferentCases() {
-        UserDto userDto = UserDto.builder()
-                .name("Test User")
-                .email("TEST@EXAMPLE.COM")
-                .build();
-
-        Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
-
-        assertTrue(violations.isEmpty());
-    }
-
-    @Test
-    void testValidation_validEmailWithSubdomain() {
-        UserDto userDto = UserDto.builder()
-                .name("Test User")
-                .email("user@sub.example.com")
-                .build();
-
-        Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
-
-        assertTrue(violations.isEmpty());
     }
 
     @Test

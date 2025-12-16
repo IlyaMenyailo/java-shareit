@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
@@ -31,4 +32,12 @@ public class BookingDto {
     private Long itemId;
 
     private BookingStatus status;
+
+    @AssertTrue(message = "Дата окончания должна быть после даты начала")
+    public boolean isEndAfterStart() {
+        if (start == null || end == null) {
+            return true;
+        }
+        return end.isAfter(start);
+    }
 }

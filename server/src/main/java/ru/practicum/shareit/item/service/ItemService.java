@@ -14,9 +14,10 @@ public interface ItemService {
 
     ItemWithBookingsDto getItemById(Long itemId, Long userId);
 
-    List<ItemWithBookingsDto> getItemsByOwner(Long ownerId);
+    List<ItemWithBookingsDto> getItemsByOwner(Long ownerId, Integer from, Integer size);
 
-    List<ItemDto> searchItems(String text);
+    List<ItemDto> searchItems(String text, Integer from, Integer size);
+
 
     void deleteItem(Long itemId);
 
