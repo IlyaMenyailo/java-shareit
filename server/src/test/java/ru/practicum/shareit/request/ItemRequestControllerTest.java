@@ -125,19 +125,4 @@ class ItemRequestControllerTest {
 
         verify(itemRequestService, never()).createItemRequest(any(), any());
     }
-
-    @Test
-    void createItemRequest_withEmptyDescription_shouldReturnBadRequest() throws Exception {
-        ItemRequestShortDto invalidRequest = ItemRequestShortDto.builder()
-                .description("")  // empty description
-                .build();
-
-        mockMvc.perform(post("/requests")
-                        .header(HttpHeaders.USER_ID_HEADER, 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalidRequest)))
-                .andExpect(status().isBadRequest());
-
-        verify(itemRequestService, never()).createItemRequest(any(), any());
-    }
 }

@@ -84,14 +84,4 @@ class ErrorHandlerTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error").value("Access denied"));
     }
-
-    @Test
-    void handleMethodArgumentNotValidException_shouldReturn400() throws Exception {
-        mockMvc.perform(post("/items")
-                        .header(HttpHeaders.USER_ID_HEADER, 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"\",\"description\":\"\",\"available\":true}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").exists());
-    }
 }

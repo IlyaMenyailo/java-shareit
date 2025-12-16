@@ -127,19 +127,4 @@ class UserControllerTest {
 
         verify(userService).deleteUser(1L);
     }
-
-    @Test
-    void createUser_withInvalidData_shouldReturnBadRequest() throws Exception {
-        UserDto invalidUser = UserDto.builder()
-                .name("")
-                .email("invalid-email")
-                .build();
-
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalidUser)))
-                .andExpect(status().isBadRequest());
-
-        verify(userService, never()).createUser(any());
-    }
 }

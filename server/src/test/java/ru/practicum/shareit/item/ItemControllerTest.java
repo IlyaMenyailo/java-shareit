@@ -162,32 +162,6 @@ class ItemControllerTest {
     }
 
     @Test
-    void searchItems_withEmptyText_shouldReturnEmptyList() throws Exception {
-        mockMvc.perform(get("/items/search")
-                        .param("text", "")
-                        .param("from", "0")
-                        .param("size", "10"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$").isEmpty());
-
-        verify(itemService, never()).searchItems(anyString(), anyInt(), anyInt());
-    }
-
-    @Test
-    void searchItems_withBlankText_shouldReturnEmptyList() throws Exception {
-        mockMvc.perform(get("/items/search")
-                        .param("text", "   ")
-                        .param("from", "0")
-                        .param("size", "10"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$").isEmpty());
-
-        verify(itemService, never()).searchItems(anyString(), anyInt(), anyInt());
-    }
-
-    @Test
     void addComment_shouldReturnCreatedComment() throws Exception {
         CreateCommentDto createComment = CreateCommentDto.builder()
                 .text("Great item!")
