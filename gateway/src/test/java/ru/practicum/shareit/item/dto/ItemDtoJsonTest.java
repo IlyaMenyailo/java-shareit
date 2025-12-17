@@ -195,4 +195,80 @@ class ItemDtoJsonTest {
         assertThat(itemDto.getRequestId()).isEqualTo(10L);
         assertThat(itemDto.getOwnerId()).isEqualTo(5L);
     }
+
+    @Test
+    void testValidation_nullName() {
+        ItemDto itemDto = ItemDto.builder()
+                .name(null)
+                .description("Valid description")
+                .available(true)
+                .build();
+
+        Set<ConstraintViolation<ItemDto>> violations = validator.validate(itemDto);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream()
+                .anyMatch(v -> v.getPropertyPath().toString().equals("name")
+                        && v.getMessage().contains("не может быть пустым")));
+    }
+
+    @Test
+    void testValidation_blankName() {
+        ItemDto itemDto = ItemDto.builder()
+                .name("   ")
+                .description("Valid description")
+                .available(true)
+                .build();
+
+        Set<ConstraintViolation<ItemDto>> violations = validator.validate(itemDto);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream()
+                .anyMatch(v -> v.getPropertyPath().toString().equals("name")
+                        && v.getMessage().contains("не может быть пустым")));
+    }
+
+    @Test
+    void testValidation_nullDescription() {
+        ItemDto itemDto = ItemDto.builder()
+                .name("Valid name")
+                .description(null)
+                .available(true)
+                .build();
+
+        Set<ConstraintViolation<ItemDto>> violations = validator.validate(itemDto);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream()
+                .anyMatch(v -> v.getPropertyPath().toString().equals("description")
+                        && v.getMessage().contains("не может быть пустым")));
+    }
+
+    @Test
+    void testValidation_optionalFieldsCanBeNull() {
+        ItemDto itemDto = ItemDto.builder()
+                .name("Item")
+                .description("Description")
+                .available(true)
+                .requestId(null)
+                .ownerId(null)
+                .build();
+
+        Set<ConstraintViolation<ItemDto>> violations = validator.validate(itemDto);
+
+        assertTrue(violations.isEmpty());
+    }
+
+    @Test
+    void testValidation_longName() {
+        ItemDto itemDto = ItemDto.builder()
+                .name("A".repeat(256))
+                .description("Description")
+                .available(true)
+                .build();
+
+        Set<ConstraintViolation<ItemDto>> violations = validator.validate(itemDto);
+
+        assertTrue(violations.isEmpty()); // No max length constraint on name
+    }
 }

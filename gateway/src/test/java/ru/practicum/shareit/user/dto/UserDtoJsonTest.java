@@ -101,6 +101,36 @@ class UserDtoJsonTest {
     }
 
     @Test
+    void testValidation_nullName() {
+        UserDto userDto = UserDto.builder()
+                .name(null)
+                .email("test@example.com")
+                .build();
+
+        Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream()
+                .anyMatch(v -> v.getPropertyPath().toString().equals("name")
+                        && v.getMessage().contains("не может быть пустым")));
+    }
+
+    @Test
+    void testValidation_blankName() {
+        UserDto userDto = UserDto.builder()
+                .name("   ")
+                .email("test@example.com")
+                .build();
+
+        Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream()
+                .anyMatch(v -> v.getPropertyPath().toString().equals("name")
+                        && v.getMessage().contains("не может быть пустым")));
+    }
+
+    @Test
     void testValidation_nullEmail() {
         UserDto userDto = UserDto.builder()
                 .name("Test User")
@@ -148,6 +178,30 @@ class UserDtoJsonTest {
                         && v.getMessage().contains("Некорректный формат email"));
 
         assertTrue(hasNotBlankViolation || hasEmailViolation);
+    }
+
+    @Test
+    void testValidation_validEmailWithDifferentCases() {
+        UserDto userDto = UserDto.builder()
+                .name("Test User")
+                .email("TEST@EXAMPLE.COM")
+                .build();
+
+        Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
+
+        assertTrue(violations.isEmpty());
+    }
+
+    @Test
+    void testValidation_validEmailWithSubdomain() {
+        UserDto userDto = UserDto.builder()
+                .name("Test User")
+                .email("user@sub.example.com")
+                .build();
+
+        Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
+
+        assertTrue(violations.isEmpty());
     }
 
     @Test

@@ -154,4 +154,32 @@ class CommentDtoJsonTest {
         assertThat(commentDto.getAuthorName()).isEqualTo("Setter");
         assertThat(commentDto.getCreated()).isEqualTo(testTime);
     }
+
+    @Test
+    void testValidation_blankText() {
+        CommentDto commentDto = CommentDto.builder()
+                .text("   ")
+                .created(testTime)
+                .build();
+
+        Set<ConstraintViolation<CommentDto>> violations = validator.validate(commentDto);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream()
+                .anyMatch(v -> v.getPropertyPath().toString().equals("text")
+                        && v.getMessage().contains("не может быть пустым")));
+    }
+
+    @Test
+    void testValidation_longText() {
+        String longText = "A".repeat(1000);
+        CommentDto commentDto = CommentDto.builder()
+                .text(longText)
+                .created(testTime)
+                .build();
+
+        Set<ConstraintViolation<CommentDto>> violations = validator.validate(commentDto);
+
+        assertTrue(violations.isEmpty()); // No max length constraint
+    }
 }

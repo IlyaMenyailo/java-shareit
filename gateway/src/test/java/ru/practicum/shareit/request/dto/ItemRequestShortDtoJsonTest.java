@@ -131,4 +131,27 @@ class ItemRequestShortDtoJsonTest {
 
         assertThat(dto.getDescription()).isEqualTo("Setter test");
     }
+
+    @Test
+    void testValidation_shortDescription() {
+        ItemRequestShortDto dto = ItemRequestShortDto.builder()
+                .description("A")
+                .build();
+
+        Set<ConstraintViolation<ItemRequestShortDto>> violations = validator.validate(dto);
+
+        assertTrue(violations.isEmpty());
+    }
+
+    @Test
+    void testValidation_longDescription() {
+        String longDescription = "A".repeat(5000);
+        ItemRequestShortDto dto = ItemRequestShortDto.builder()
+                .description(longDescription)
+                .build();
+
+        Set<ConstraintViolation<ItemRequestShortDto>> violations = validator.validate(dto);
+
+        assertTrue(violations.isEmpty());
+    }
 }
